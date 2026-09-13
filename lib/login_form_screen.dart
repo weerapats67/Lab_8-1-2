@@ -1,42 +1,178 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class LoginFormScreen extends StatefulWidget {
+  const LoginFormScreen({super.key});
 
-@override
+  @override
+  State<LoginFormScreen> createState() => _LoginFormScreenState();
+}
+
+class _LoginFormScreenState extends State<LoginFormScreen> {
+  // Form Key
+  final _formKey = GlobalKey<FormState>();
+
+  // Controllers
+  late final TextEditingController _emailController;
+  late final TextEditingController _passwordController;
+
+  // ข้อมูลที่บันทึก
+  String _savedEmail = '';
+  String _savedPassword = '';
+
+  @override
+  void initState() {
+    super.initState();
+
+    _emailController = TextEditingController();
+    _passwordController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Layouts',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('ฟอร์มล็อกอิน'),
       ),
-      home: const MyHomePage(),
+
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+
+        child: Form(
+          key: _formKey,
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+
+            children: <Widget>[
+              // ข้อความด้านบน
+              const Text(
+                'กรุณาป้อนข้อมูลเข้าสู่ระบบ:',
+                style: TextStyle(fontSize: 16),
+              ),
+
+              const SizedBox(height: 20),
+
+              // =========================
+              // Email
+              // =========================
+              TextFormField(
+                controller: _emailController,
+
+                decoration: const InputDecoration(
+                  labelText: 'อีเมล',
+                  hintText: 'you@example.com',
+                  prefixIcon: Icon(Icons.email),
+                  border: OutlineInputBorder(),
+                ),
+
+                keyboardType: TextInputType.emailAddress,
+
+                // Email Validator
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'กรุณาป้อนอีเมลของคุณ';
+                  }
+
+                  if (!value.contains('@') || !value.contains('.')) {
+                    return 'กรุณาป้อนที่อยู่อีเมลที่ถูกต้อง';
+                  }
+
+                  return null;
+                },
+
+                // บันทึก Email
+                onSaved: (value) {
+                  if (value != null) {
+                    _savedEmail = value;
+                  }
+                },
+              ),
+
+              const SizedBox(height: 15),
+
+              // =========================
+              // Password
+              // =========================
+              TextFormField(
+                controller: _passwordController,
+
+                decoration: const InputDecoration(
+                  labelText: 'รหัสผ่าน',
+                  hintText: 'ป้อนรหัสผ่านของคุณ',
+                  prefixIcon: Icon(Icons.lock),
+                  border: OutlineInputBorder(),
+                ),
+
+                obscureText: true,
+
+                // Password Validator
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'กรุณาป้อนรหัสผ่านของคุณ';
+                  }
+
+                  if (value.length < 6) {
+                    return 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
+                  }
+
+                  return null;
+                },
+
+                // บันทึก Password
+                onSaved: (value) {
+                  if (value != null) {
+                    _savedPassword = value;
+                  }
+                },
+              ),
+
+              const SizedBox(height: 30),
+
+              // =========================
+              // ปุ่ม Login
+              // =========================
+              ElevatedButton(
+                onPressed: () {
+                  // ตรวจสอบ Form
+                  if (_formKey.currentState != null &&
+                      _formKey.currentState!.validate()) {
+
+                    // บันทึกข้อมูลจาก onSaved
+                    _formKey.currentState!.save();
+
+                    // แสดงข้อมูลที่บันทึก
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'ล็อกอินสำเร็จ! อีเมล: $_savedEmail, '
+                          'รหัสผ่าน: $_savedPassword',
+                        ),
+                      ),
+                    );
+
+                    // แสดงใน Debug Console
+                    print('อีเมลที่บันทึก: $_savedEmail');
+                    print('รหัสผ่านที่บันทึก: $_savedPassword');
+
+                  } else {
+                    print('ฟอร์มไม่ถูกต้อง');
+                  }
+                },
+
+                child: const Text('ล็อกอิน'),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
-}
-class MyHomePage extends StatelessWidget {
-  const MyHomePage({super.key});
-
-@override
-Widget build(BuildContext context) {
-  return Scaffold(
-    appBar: AppBar(
-      title: const Text('ปฏิบัติการบทที่ 5 - Layouts'), // อัปเดต title
-      backgroundColor: Colors.indigo, // เปลี่ยนสีตามต้องการ
-    ),
-    body: const Padding( 
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-      children: <Widget>[
-    Icon(Icons.home, size: 40.0, color: Colors.blue),
-    Icon(Icons.search, size: 40.0, color: Colors.green),
-    Icon(Icons.person, size: 40.0, color: Colors.orange),
-  ],
-),
-    ),
-  );
- }
 }
